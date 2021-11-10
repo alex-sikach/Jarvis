@@ -39,8 +39,8 @@ function eval2(s, kw_length = 0) {
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	str = str.slice(i);
 
-	for (j = 2; j < str.length; j++) {
-		if (!isNaN(Number(str[j])) || str[j] == '') break;
+	for (j = 1; j < str.length; j++) {
+		if (!isNaN(Number(str[j])) && str[j] != '-') break;
 	}
 	let s_el = str.slice(j);
 	if (s_el === '') { }
