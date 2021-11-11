@@ -100,28 +100,36 @@ Also you can use the math action commands such as
 			let arr = eval2(s = text, kw_length = 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
-			else
-				return bot.telegram.sendMessage(chatId, `${arr[0] + arr[1]}`);
+			else {
+				await bot.telegram.sendMessage(chatId, `${arr[0] + arr[1]}`);
+				return bot.telegram.sendSticker(chatId, stickers.scientist);
+			}
 		} else if (text.slice(0, 6) === '/вычти' && text[6] === ' ') {
 			let arr = eval2(s = text, kw_length = 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
-			else
-				return bot.telegram.sendMessage(chatId, `${arr[0] - arr[1]}`);
+			else {
+				await bot.telegram.sendMessage(chatId, `${arr[0] - arr[1]}`);
+				return bot.telegram.sendSticker(chatId, stickers.scientist);
+			}
 		} else if (text.slice(0, 7) === '/умножь' && text[7] === ' ') {
 			let arr = eval2(s = text, kw_length = 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
-			else
-				return bot.telegram.sendMessage(chatId, `${arr[0] * arr[1]}`);
+			else {
+				await bot.telegram.sendMessage(chatId, `${arr[0] * arr[1]}`);
+				return bot.telegram.sendSticker(chatId, stickers.scientist);
+			}
 		} else if (text.slice(0, 7) === '/подели' && text[7] === ' ') {
 			let arr = eval2(s = text, kw_length = 7);
 			if (arr[1] === 0)
 				return bot.telegram.sendMessage(chatId, 'Деление на 0!')
 			else if (arr[0] === '' || arr[1] === '') {
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
-			} else
-				return bot.telegram.sendMessage(chatId, `${arr[0] / arr[1]}`);
+			} else {
+				await bot.telegram.sendMessage(chatId, `${arr[0] / arr[1]}`);
+				return bot.telegram.sendSticker(chatId, stickers.scientist);
+			}
 		} else if (
 			text.includes('what') &&
 			text.includes('can') &&
