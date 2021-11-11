@@ -164,7 +164,7 @@ Also you can use the math action commands such as
 				} break;
 			}
 			if (attemp !== 2)
-				await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp]);
+				await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp], game_options);
 			attemp++;
 		}
 	})
