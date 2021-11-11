@@ -36,7 +36,6 @@ function eval2(s, kw_length = 0) {
 	if (f_el === '') { }
 	else f_el = Number(f_el);
 
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	str = str.slice(i);
 
 	for (j = 1; j < str.length; j++) {
@@ -52,7 +51,7 @@ function eval2(s, kw_length = 0) {
 const startGame = async (chatId) =>
 {
 	attemp = 0;
-	await bot.telegram.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 10.');
+	await bot.telegram.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 10, дай мне пару секунд.');
 	var maxv = await 10;
 	var randomNumber = await Math.floor(Math.random() * 11);
 	console.log(randomNumber);
@@ -70,8 +69,10 @@ const startGame = async (chatId) =>
 		if ((i + 1) % 3 == 0)
 			row++;
 	}
-	
-	await bot.telegram.sendMessage(chatId, 'Отгадывай', game_options);
+	await bot.telegram.sendSticker(chatId, stickers.hmm);
+	await setTimeout(() => {
+		bot.telegram.sendMessage(chatId, 'Отгадывай', game_options);
+	}, 3500);
 }
 
 const start = () => {
@@ -83,7 +84,7 @@ const start = () => {
 			await bot.telegram.sendMessage(chatId, `Hi, ${mes.from.first_name}! How can I help you?`);
 			return bot.telegram.sendSticker(chatId, stickers.test);
 		} else if (text === '/help') {
-			return bot.telegram.sendMessage(chatId,
+			await bot.telegram.sendMessage(chatId,
 				`Hey there!
 Exactly this bot was made for fun.
 So you can use command /game to run the game "Lucker".
@@ -94,6 +95,7 @@ Also you can use the math action commands such as
 /подели 9, 3
 Проследи за каждым пробелом иначе будет
 выведено: Wrong input!`);
+			return bot.telegram.sendSticker(chatId, stickers.magic);
 		} else if (text === '/game') {
 			return startGame(chatId);
 		} else if (text.slice(0, 6) === '/сложи' && text[6] === ' ') {
@@ -122,9 +124,10 @@ Also you can use the math action commands such as
 			}
 		} else if (text.slice(0, 7) === '/подели' && text[7] === ' ') {
 			let arr = eval2(s = text, kw_length = 7);
-			if (arr[1] === 0)
-				return bot.telegram.sendMessage(chatId, 'Деление на 0!')
-			else if (arr[0] === '' || arr[1] === '') {
+			if (arr[1] === 0) {
+				await bot.telegram.sendMessage(chatId, 'Деление на 0!');
+				return bot.telegram.sendSticker(chatId, stickers.too_hard);
+			} else if (arr[0] === '' || arr[1] === '') {
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			} else {
 				await bot.telegram.sendMessage(chatId, `${arr[0] / arr[1]}`);
