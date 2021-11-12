@@ -1,12 +1,16 @@
-const security = require('./security.js');
-const { Telegraf } = require('telegraf');
-const stickers = require('./stickers.js');
+import security from './security.js';
+import { Telegraf } from 'telegraf';
+import stickers from './stickers.js';
+import fetch from 'node-fetch';
 const bot = new Telegraf(security.TELEGRAM_BOT_TOKEN);
 
 bot.telegram.setMyCommands([
 	{command: '/start', description: 'Start a dialogue.'},
 	{command: '/help', description: 'Get info about the bot.' },
-	{command: '/game', description: 'Start game "Lucker"'}
+	{ command: '/game', description: 'Start game "Lucker"' },
+	{command: '/fact', description: 'get random fact'},
+	{command: '/avatar', description: 'get your current avatar picture' },
+	{command: '/all_avatars', description: 'get all your avatar pictures'}
 ]);
 
 const chats = {};
@@ -25,7 +29,15 @@ const again_options = {
 		]
 	}
 };
-
+async function getFact(lim) {
+	let json = await fetch(`https://api.api-ninjas.com/v1/facts?limit=${lim}`,
+	{
+		method: 'GET',
+		headers: { 'X-Api-Key': 'd9UaPhRMYcngvTtdsctZhw==Y4Imi1Us5nPwhU8z'},
+		contentType: 'application/json',
+	});
+	return await json.json();
+}
 function eval2(s, kw_length = 0) {
 	let str = s;
 	let i, j;
@@ -76,6 +88,10 @@ const startGame = async (chatId) =>
 }
 
 const start = () => {
+	bot.command('fact', async ctx => {
+		let fact = await getFact(1);
+		return bot.telegram.sendMessage(ctx.chat.id, fact[0].fact);
+	});
 	bot.on('message', async mes => {
 		const text = mes.message.text.toLowerCase();
 		const chatId = mes.chat.id;
@@ -94,7 +110,8 @@ Also you can use the math action commands such as
 Пример:
 /подели 9, 3
 Проследи за каждым пробелом иначе будет
-выведено: Wrong input!`);
+выведено: Wrong input!
+Also if you need to get your avatar picture - use command /avatar`);
 			return bot.telegram.sendSticker(chatId, stickers.magic);
 		} else if (text === '/game') {
 			return startGame(chatId);
@@ -133,13 +150,24 @@ Also you can use the math action commands such as
 				await bot.telegram.sendMessage(chatId, `${arr[0] / arr[1]}`);
 				return bot.telegram.sendSticker(chatId, stickers.scientist);
 			}
+		} else if (text === '/avatar') {
+			let p = await bot.telegram.getUserProfilePhotos(mes.message.from.id);
+			return bot.telegram.sendPhoto(chatId, p.photos[0][1].file_id, {
+				caption: `Also you have ${p.photos.length - 1} more. Use command /all_avatars to get all your avatars pictures.`
+			});
+		} else if (text === '/all_avatars') {
+			let p = await bot.telegram.getUserProfilePhotos(mes.message.from.id);
+			for (let i = 0; i < p.photos.length; i++) {
+				await bot.telegram.sendPhoto(chatId, p.photos[p.photos.length - 1 - i][0].file_id);
+			}
+			return 0;
 		} else if (
 			text.includes('what') &&
 			text.includes('can') &&
 			(text.includes('you') || text.includes('u'))
 		) {
 			return bot.telegram.sendMessage(chatId,
-				`Use command /help to get information about bot's capacity `
+				`Use command /help to get information about bot's capacity.`
 			);
 		} else if (
 			text.includes('hi') ||
@@ -147,6 +175,7 @@ Also you can use the math action commands such as
 			text.includes("whats'up") ||
 			text.includes('sup')
 		) {
+			console.log(text.includes('hi'));
 			return bot.telegram.sendMessage(chatId, 'Hey there!');
 		}
 		return bot.telegram.sendMessage(chatId, `Sorry, I do not understand you.`);
