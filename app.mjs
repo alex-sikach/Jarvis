@@ -111,7 +111,8 @@ Also you can use the math action commands such as
 /подели 9, 3
 Проследи за каждым пробелом иначе будет
 выведено: Wrong input!
-Also if you need to get your avatar picture - use command /avatar`);
+
+You can see the all rest commands typed /`);
 			return bot.telegram.sendSticker(chatId, stickers.magic);
 		} else if (text === '/game') {
 			return startGame(chatId);
