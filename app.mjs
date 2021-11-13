@@ -33,7 +33,7 @@ async function getFact(lim) {
 	let json = await fetch(`https://api.api-ninjas.com/v1/facts?limit=${lim}`,
 	{
 		method: 'GET',
-		headers: { 'X-Api-Key': 'd9UaPhRMYcngvTtdsctZhw==Y4Imi1Us5nPwhU8z'},
+		headers: { 'X-Api-Key': security.fact_api_key},
 		contentType: 'application/json',
 	});
 	return await json.json();
@@ -66,8 +66,7 @@ const startGame = async (chatId) =>
 	await bot.telegram.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 10, дай мне пару секунд.');
 	var maxv = await 10;
 	var randomNumber = await Math.floor(Math.random() * 11);
-	console.log(randomNumber);
-	chats[chatId] = randomNumber;	
+	chats[chatId] = randomNumber;
 	//filling the inline keyboard by empty arrays
 	//создаем вложенность
 	for (let i = 0; i < Math.ceil((maxv + 1) / 3); i++) {
@@ -117,7 +116,7 @@ You can see the all rest commands typed /`);
 		} else if (text === '/game') {
 			return startGame(chatId);
 		} else if (text.slice(0, 6) === '/сложи' && text[6] === ' ') {
-			let arr = eval2(s = text, kw_length = 6);
+			let arr = eval2(text, 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
@@ -125,7 +124,7 @@ You can see the all rest commands typed /`);
 				return bot.telegram.sendSticker(chatId, stickers.scientist);
 			}
 		} else if (text.slice(0, 6) === '/вычти' && text[6] === ' ') {
-			let arr = eval2(s = text, kw_length = 6);
+			let arr = eval2(text, 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
@@ -133,7 +132,7 @@ You can see the all rest commands typed /`);
 				return bot.telegram.sendSticker(chatId, stickers.scientist);
 			}
 		} else if (text.slice(0, 7) === '/умножь' && text[7] === ' ') {
-			let arr = eval2(s = text, kw_length = 6);
+			let arr = eval2(text, 6);
 			if (arr[0] === '' || arr[1] === '')
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
@@ -141,7 +140,7 @@ You can see the all rest commands typed /`);
 				return bot.telegram.sendSticker(chatId, stickers.scientist);
 			}
 		} else if (text.slice(0, 7) === '/подели' && text[7] === ' ') {
-			let arr = eval2(s = text, kw_length = 7);
+			let arr = eval2(text, 7);
 			if (arr[1] === 0) {
 				await bot.telegram.sendMessage(chatId, 'Деление на 0!');
 				return bot.telegram.sendSticker(chatId, stickers.too_hard);
