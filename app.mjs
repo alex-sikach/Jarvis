@@ -8,7 +8,8 @@ bot.telegram.setMyCommands([
 	{command: '/start', description: 'Start a dialogue.'},
 	{command: '/help', description: 'Get info about the bot.' },
 	{ command: '/game', description: 'Start game "Lucker"' },
-	{command: '/fact', description: 'get random fact'},
+	{ command: '/fact', description: 'get random fact' },
+	{command: '/joke', description: 'get random joke'},
 	{command: '/avatar', description: 'get your current avatar picture' },
 	{command: '/all_avatars', description: 'get all your avatar pictures'}
 ]);
@@ -33,8 +34,17 @@ async function getFact(lim) {
 	let json = await fetch(`https://api.api-ninjas.com/v1/facts?limit=${lim}`,
 	{
 		method: 'GET',
-		headers: { 'X-Api-Key': security.fact_api_key},
+		headers: { 'X-Api-Key': security.ninjas_api_key},
 		contentType: 'application/json',
+	});
+	return await json.json();
+}
+async function getJoke(lim) {
+	let json = await fetch(`https://api.api-ninjas.com/v1/jokes?limit=${lim}`,
+	{
+		method: 'GET',
+		headers: { 'X-Api-Key': security.ninjas_api_key },
+		contentType: 'application/json'
 	});
 	return await json.json();
 }
@@ -88,6 +98,10 @@ const startGame = async (chatId) =>
 
 const start = () => {
 	bot.command('fact', async ctx => {
+		let fact = await getFact(1);
+		return bot.telegram.sendMessage(ctx.chat.id, fact[0].fact);
+	});
+	bot.command('joke', async ctx => {
 		let fact = await getFact(1);
 		return bot.telegram.sendMessage(ctx.chat.id, fact[0].fact);
 	});
