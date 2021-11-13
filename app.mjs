@@ -131,7 +131,7 @@ You can see the all rest commands typed /`);
 			return startGame(chatId);
 		} else if (text.slice(0, 6) === '/сложи' && text[6] === ' ') {
 			let arr = eval2(text, 6);
-			if (arr[0] === '' || arr[1] === '')
+			if (arr[0] === '' || arr[1] === '' || isNaN(arr[0] + arr[1]))
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
 				await bot.telegram.sendMessage(chatId, `${arr[0] + arr[1]}`);
@@ -139,7 +139,7 @@ You can see the all rest commands typed /`);
 			}
 		} else if (text.slice(0, 6) === '/вычти' && text[6] === ' ') {
 			let arr = eval2(text, 6);
-			if (arr[0] === '' || arr[1] === '')
+			if (arr[0] === '' || arr[1] === '' || isNaN(arr[0] - arr[1]))
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
 				await bot.telegram.sendMessage(chatId, `${arr[0] - arr[1]}`);
@@ -147,7 +147,7 @@ You can see the all rest commands typed /`);
 			}
 		} else if (text.slice(0, 7) === '/умножь' && text[7] === ' ') {
 			let arr = eval2(text, 6);
-			if (arr[0] === '' || arr[1] === '')
+			if (arr[0] === '' || arr[1] === '' || isNaN(arr[0] * arr[1]))
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			else {
 				await bot.telegram.sendMessage(chatId, `${arr[0] * arr[1]}`);
@@ -158,7 +158,7 @@ You can see the all rest commands typed /`);
 			if (arr[1] === 0) {
 				await bot.telegram.sendMessage(chatId, 'Деление на 0!');
 				return bot.telegram.sendSticker(chatId, stickers.too_hard);
-			} else if (arr[0] === '' || arr[1] === '') {
+			} else if (arr[0] === '' || arr[1] === '' || isNaN(arr[0] / arr[1])) {
 				return bot.telegram.sendMessage(chatId, `Wrong input!`)
 			} else {
 				await bot.telegram.sendMessage(chatId, `${arr[0] / arr[1]}`);
