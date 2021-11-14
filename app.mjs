@@ -102,8 +102,8 @@ const start = () => {
 		return bot.telegram.sendMessage(ctx.chat.id, fact[0].fact);
 	});
 	bot.command('joke', async ctx => {
-		let fact = await getFact(1);
-		return bot.telegram.sendMessage(ctx.chat.id, fact[0].fact);
+		let joke = await getJoke(1);
+		return bot.telegram.sendMessage(ctx.chat.id, joke[0].joke);
 	});
 	bot.on('message', async mes => {
 		const text = mes.message.text.toLowerCase();
