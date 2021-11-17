@@ -7,16 +7,17 @@ const bot = new Telegraf(security.TELEGRAM_BOT_TOKEN);
 bot.telegram.setMyCommands([
 	{command: '/start', description: 'Start a dialogue.'},
 	{command: '/help', description: 'Get info about the bot.' },
-	{ command: '/game', description: 'Start game "Lucker"' },
-	{ command: '/fact', description: 'get random fact' },
+	{command: '/game', description: 'Start game "Lucker"' },
+	{command: '/fact', description: 'get random fact' },
 	{command: '/joke', description: 'get random joke'},
 	{command: '/avatar', description: 'get your current avatar picture' },
 	{command: '/all_avatars', description: 'get all your avatar pictures'}
 ]);
 
 const chats = {};
+var waiting_answer = 0;
 var attemp;
-const game_options = { //a template of inline keyboard
+var game_options = { //a template of inline keyboard
 	reply_markup: {
 		inline_keyboard: [
 
@@ -48,6 +49,31 @@ async function getJoke(lim) {
 	});
 	return await json.json();
 }
+async function reactionsToAns(data, cxt, chatId) {
+	if (data == chats[chatId] && attemp <= 2) {
+		switch (attemp) {
+			case 0: await bot.telegram.sendMessage(chatId, 'What the f.. On the firs try!'); break;
+			case 1: await bot.telegram.sendMessage(chatId, 'Yes! Well done!'); break;
+			case 2: await bot.telegram.sendMessage(chatId, 'Finally!'); break;
+		}
+		waiting_answer = 0;
+		await bot.telegram.sendSticker(chatId, stickers.game.win[attemp], again_options);
+		attemp++;
+	} else if(attemp <= 2) {
+		switch (attemp) {
+			case 0: await bot.telegram.sendMessage(chatId, 'Not exactly true. Try again.'); break;
+			case 1: await bot.telegram.sendMessage(chatId, 'Are you kidding me? Turn on your brains, please.'); break;
+			case 2: {
+				await bot.telegram.sendMessage(chatId, 'Nooo!');
+				await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp]);
+				return bot.telegram.sendMessage(chatId, `The number was ${chats[chatId]}`, again_options);
+			} break;
+		}
+		if (attemp !== 2)
+			await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp], game_options);
+		attemp++;
+	}
+}
 function eval2(s, kw_length = 0) {
 	let str = s;
 	let i, j;
@@ -70,30 +96,36 @@ function eval2(s, kw_length = 0) {
 	return [f_el, s_el];
 }
 
-const startGame = async (chatId) =>
+const startGame = async (chatId, maxv) =>
 {
+	game_options={reply_markup:{inline_keyboard:[]}}; //clearing array
 	attemp = 0;
-	await bot.telegram.sendMessage(chatId, 'Сейчас я загадаю цифру от 0 до 10, дай мне пару секунд.');
-	var maxv = await 10;
-	var randomNumber = await Math.floor(Math.random() * 11);
+	await bot.telegram.sendMessage(chatId, 'Окей, дай чуть-чуть подумать..');
+	let randomNumber = Math.floor(Math.random() * maxv) + 1;
+	// console.log(`random = ${randomNumber}`);
 	chats[chatId] = randomNumber;
-	//filling the inline keyboard by empty arrays
-	//создаем вложенность
-	for (let i = 0; i < Math.ceil((maxv + 1) / 3); i++) {
-		game_options.reply_markup.inline_keyboard[i] = [];
-	}
-	let row = 0;
-	for (let i = 0; i < maxv + 1; i++) {
-		game_options.reply_markup.inline_keyboard[row].push(
-			{ text: i, callback_data: i }
-		);
-		if ((i + 1) % 3 == 0)
-			row++;
-	}
 	await bot.telegram.sendSticker(chatId, stickers.hmm);
-	await setTimeout(() => {
-		bot.telegram.sendMessage(chatId, 'Отгадывай', game_options);
-	}, 3500);
+	if (maxv <= 10) {
+		//filling the inline keyboard by empty arrays
+		//создаем вложенность
+		for (let i = 0; i < Math.ceil((maxv + 1) / 3); i++) {
+			game_options.reply_markup.inline_keyboard[i] = [];
+		}
+		let row = 0;
+		for (let i = 0; i < maxv + 1; i++) {
+			game_options.reply_markup.inline_keyboard[row].push(
+				{ text: i, callback_data: i }
+			);
+			if ((i + 1) % 3 == 0)
+				row++;
+		}
+		// await setTimeout(() => {
+			bot.telegram.sendMessage(chatId, 'Отгадывай', game_options);
+		// }, 3500);
+	} else {
+		bot.telegram.sendMessage(chatId, 'Enter your guess:');
+		waiting_answer = 2;
+	}
 }
 
 const start = () => {
@@ -128,7 +160,18 @@ Also you can use the math action commands such as
 You can see the all rest commands typed /`);
 			return bot.telegram.sendSticker(chatId, stickers.magic);
 		} else if (text === '/game') {
-			return startGame(chatId);
+			await bot.telegram.sendMessage(chatId, 'От нуля до скольки мне загадать число?');
+			waiting_answer = 1;
+			return 0;
+		} else if (waiting_answer == 1) {
+			waiting_answer = 0;
+			if (isNaN(Number(mes.message.text))) {
+				return bot.telegram.sendMessage(chatId, `It is not a number, sorry)`)
+			} else {
+				return startGame(chatId, Number(mes.message.text));
+			}
+		} else if (waiting_answer == 2) {
+			return reactionsToAns(mes.message.text, mes, chatId);
 		} else if (text.slice(0, 6) === '/сложи' && text[6] === ' ') {
 			let arr = eval2(text, 6);
 			if (arr[0] === '' || arr[1] === '' || isNaN(arr[0] + arr[1]))
@@ -198,28 +241,11 @@ You can see the all rest commands typed /`);
 		const data = await msg.callbackQuery.data;
 		const chatId = await msg.chat.id;
 		if (data === '/play_again') {
-			return startGame(chatId);
-		} else if (data == chats[chatId] && attemp <= 2) {
-			switch (attemp) {
-				case 0: await bot.telegram.sendMessage(chatId, 'What the f.. On the firs try!'); break;
-				case 1: await bot.telegram.sendMessage(chatId, 'Yes! Well done!'); break;
-				case 2: await bot.telegram.sendMessage(chatId, 'Finally!'); break;
-			}
-			await bot.telegram.sendSticker(chatId, stickers.game.win[attemp], again_options);
-			attemp++;
-		} else if(attemp <= 2) {
-			switch (attemp) {
-				case 0: await bot.telegram.sendMessage(chatId, 'Not exactly true. Try again.'); break;
-				case 1: await bot.telegram.sendMessage(chatId, 'Are you kidding me? Turn on your brains, please.'); break;
-				case 2: {
-					await bot.telegram.sendMessage(chatId, 'Nooo!');
-					await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp]);
-					return bot.telegram.sendMessage(chatId, `The number was ${chats[chatId]}`, again_options);
-				} break;
-			}
-			if (attemp !== 2)
-				await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp], game_options);
-			attemp++;
+			waiting_answer = 1;
+			return await bot.telegram.sendMessage(chatId, 'От нуля до скольки мне загадать число?');
+		} else {
+			reactionsToAns(data, msg, chatId);
+			return 0;
 		}
 	})
 }
