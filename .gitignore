@@ -3,3 +3,5 @@ package.json
 /node_modules
 security.js
 stickers.js
+test.js
+test2.mjs
