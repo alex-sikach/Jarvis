@@ -66,6 +66,7 @@ async function reactionsToAns(data, cxt, chatId) {
 			case 2: {
 				await bot.telegram.sendMessage(chatId, 'Nooo!');
 				await bot.telegram.sendSticker(chatId, stickers.game.lose[attemp]);
+				waiting_answer = 0;
 				return bot.telegram.sendMessage(chatId, `The number was ${chats[chatId]}`, again_options);
 			} break;
 		}
@@ -119,12 +120,14 @@ const startGame = async (chatId, maxv) =>
 			if ((i + 1) % 3 == 0)
 				row++;
 		}
-		// await setTimeout(() => {
+		await setTimeout(() => {
 			bot.telegram.sendMessage(chatId, 'Отгадывай', game_options);
-		// }, 3500);
+		}, 3500);
 	} else {
-		bot.telegram.sendMessage(chatId, 'Enter your guess:');
-		waiting_answer = 2;
+		await setTimeout(() => {
+			bot.telegram.sendMessage(chatId, 'Enter your guess:');
+			waiting_answer = 2;
+		}, 3500);
 	}
 }
 
