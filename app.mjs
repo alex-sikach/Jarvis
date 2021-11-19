@@ -6,14 +6,16 @@ const bot = new Telegraf(security.TELEGRAM_BOT_TOKEN);
 
 bot.telegram.setMyCommands([
 	{command: '/start', description: 'Start a dialogue.'},
-	{command: '/help', description: 'Get info about the bot.' },
+	{command: '/help', description: 'Get some help of using.'},
+	{command: '/commands', description: 'See what are there the commands and how to use them.'},
 	{command: '/game', description: 'Start game "Lucker"' },
 	{command: '/fact', description: 'get random fact' },
 	{command: '/joke', description: 'get random joke'},
 	{command: '/avatar', description: 'get your current avatar picture' },
-	{command: '/all_avatars', description: 'get all your avatar pictures'}
+	{command: '/all_avatars', description: 'get all your avatar pictures' }
 ]);
 
+const usersBase = [];
 const chats = {};
 var waiting_answer = 0;
 var attemp;
@@ -140,27 +142,38 @@ const start = () => {
 		let joke = await getJoke(1);
 		return bot.telegram.sendMessage(ctx.chat.id, joke[0].joke);
 	});
-	bot.on('message', async mes => {
+	bot.on('message', async mes =>
+	{
 		const text = mes.message.text.toLowerCase();
 		const chatId = mes.chat.id;
 	
 		if (text === '/start') {
+			let fromArr = mes.from;
+			console.log(!usersBase.includes(mes.from));
+			console.log(usersBase[0] == mes.from);
+			console.log(usersBase[0]);
+			console.log(mes.from);
+			//testing the same, but with the copy of mes.from
+			console.log(!usersBase.includes(fromArr));
+			console.log(Object(usersBase[0]) == Object(fromArr));
+			console.log(usersBase);
+			if (!usersBase.includes(mes.from)) {
+				usersBase.push(fromArr);
+				console.log(`${mes.from.first_name} ${mes.from.last_name} has started the dialogue`)
+			}
 			await bot.telegram.sendMessage(chatId, `Hi, ${mes.from.first_name}! How can I help you?`);
 			return bot.telegram.sendSticker(chatId, stickers.test);
 		} else if (text === '/help') {
+			let date = new Date();
+			let min = date.getMinutes();
+			let hours = date.getHours();
+			let day = date.getDay();
+			let week_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+			return await bot.telegram.sendMessage(chatId,
+				`Hey there!$\nExactly this bot was made for fun.\nSo you can use /commands to see all bot's cammands and how to use them.\n${week_days[day]} ${hours}:${min}`);
+		} else if (text === '/commands') {
 			await bot.telegram.sendMessage(chatId,
-				`Hey there!
-Exactly this bot was made for fun.
-So you can use command /game to run the game "Lucker".
-Also you can use the math action commands such as
-/сложи, /умножь, /вычти и /подели,
-и сразу после пробела напиши 2 числа, над которыми должны быть произведены действия.
-Пример:
-/подели 9, 3
-Проследи за каждым пробелом иначе будет
-выведено: Wrong input!
-
-You can see the all rest commands typed /`);
+				`There is command /game, which start the game 'Lucker'. Also you can use the math action commands such as\n/сложи, /умножь, /вычти и /подели,\nи сразу после пробела напиши 2 числа, над которыми должны быть произведены действия.\nПример:\n/подели 9, 3\nПроследи за каждым пробелом иначе будет\nвыведено: Wrong input!\nThere are 2 more cool commands -\n/fact and /joke. You'll get the random joke or real fact.\nP.S. Sometimes it's really big.\nAnd also there are 2 useful commands -\n/avatar and /all_avatars.\nThe command /all_avatars will show you all yours avatars.\nJust type the / to see them.`);
 			return bot.telegram.sendSticker(chatId, stickers.magic);
 		} else if (text === '/game') {
 			await bot.telegram.sendMessage(chatId, 'От нуля до скольки мне загадать число?');
@@ -235,7 +248,6 @@ You can see the all rest commands typed /`);
 			text.includes("whats'up") ||
 			text.includes('sup')
 		) {
-			console.log(text.includes('hi'));
 			return bot.telegram.sendMessage(chatId, 'Hey there!');
 		}
 		return bot.telegram.sendMessage(chatId, `Sorry, I do not understand you.`);
