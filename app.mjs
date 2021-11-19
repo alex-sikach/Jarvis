@@ -2,6 +2,7 @@ import security from './security.js';
 import { Telegraf } from 'telegraf';
 import stickers from './stickers.js';
 import fetch from 'node-fetch';
+// import _ from 'lodash';
 const bot = new Telegraf(security.TELEGRAM_BOT_TOKEN);
 
 bot.telegram.setMyCommands([
@@ -148,18 +149,24 @@ const start = () => {
 		const chatId = mes.chat.id;
 	
 		if (text === '/start') {
-			let fromArr = mes.from;
-			console.log(!usersBase.includes(mes.from));
-			console.log(usersBase[0] == mes.from);
-			console.log(usersBase[0]);
-			console.log(mes.from);
-			//testing the same, but with the copy of mes.from
-			console.log(!usersBase.includes(fromArr));
-			console.log(Object(usersBase[0]) == Object(fromArr));
-			console.log(usersBase);
-			if (!usersBase.includes(mes.from)) {
-				usersBase.push(fromArr);
-				console.log(`${mes.from.first_name} ${mes.from.last_name} has started the dialogue`)
+			let from = mes.from;
+			let dublicate = false;
+			// * first way - JSON.stringify(obj1, obj2);
+			usersBase.forEach((el) => {
+				if (JSON.stringify(from) === JSON.stringify(el))
+					dublicate = true;
+			});
+			// * second strong way - package "Lodash" _
+			/*
+			usersBase.forEach((el) => {
+				if (_.isEqual(from, el))
+					dublicate = true;
+			});
+			*/
+			if (!dublicate) {
+				usersBase.push(from);
+				console.log(`${mes.from.first_name} ${mes.from.last_name} has started the dialogue`);
+				console.log(usersBase);
 			}
 			await bot.telegram.sendMessage(chatId, `Hi, ${mes.from.first_name}! How can I help you?`);
 			return bot.telegram.sendSticker(chatId, stickers.test);
