@@ -177,7 +177,7 @@ const start = () => {
 			let day = date.getDay();
 			let week_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 			return await bot.telegram.sendMessage(chatId,
-				`Hey there!$\nExactly this bot was made for fun.\nSo you can use /commands to see all bot's cammands and how to use them.\n${week_days[day]} ${hours}:${min}`);
+				`Hey there!\nExactly this bot was made for fun.\nSo you can use /commands to see all bot's cammands and how to use them.\n${week_days[day]} ${hours}:${min}`);
 		} else if (text === '/commands') {
 			await bot.telegram.sendMessage(chatId,
 				`There is command /game, which start the game 'Lucker'. Also you can use the math action commands such as\n/сложи, /умножь, /вычти и /подели,\nи сразу после пробела напиши 2 числа, над которыми должны быть произведены действия.\nПример:\n/подели 9, 3\nПроследи за каждым пробелом иначе будет\nвыведено: Wrong input!\nThere are 2 more cool commands -\n/fact and /joke. You'll get the random joke or real fact.\nP.S. Sometimes it's really big.\nAnd also there are 2 useful commands -\n/avatar and /all_avatars.\nThe command /all_avatars will show you all yours avatars.\nJust type the / to see them.`);
@@ -256,6 +256,19 @@ const start = () => {
 			text.includes('sup')
 		) {
 			return bot.telegram.sendMessage(chatId, 'Hey there!');
+		} else if(text === 'нэп' || text === 'nep') {
+			const nep_options = {
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{text: 'Цель', callback_data: 'nep_targets'},
+							{text: 'Мероприятия', callback_data: 'nep_events'},
+							{text: 'Итоги', callback_data: 'nep_results'}
+						]
+					]
+				}
+			};
+			return bot.telegram.sendMessage(chatId, 'Выберите раздел:', nep_options);
 		}
 		return bot.telegram.sendMessage(chatId, `Sorry, I do not understand you.`);
 	})
@@ -265,11 +278,20 @@ const start = () => {
 		if (data === '/play_again') {
 			waiting_answer = 1;
 			return await bot.telegram.sendMessage(chatId, 'От нуля до скольки мне загадать число?');
+		} else if(data === 'nep_targets') {
+			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
+			return bot.telegram.sendPhoto(chatId, {source: './nep_img/targets/targets.jpg'});
+		} else if(data === 'nep_events') {
+			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
+			return bot.telegram.sendPhoto(chatId, {source: './nep_img/events/events.jpg'});
+		} else if(data === 'nep_results') {
+			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
+			return bot.telegram.sendPhoto(chatId, {source: './nep_img/results/results.jpg'});
 		} else {
 			reactionsToAns(data, msg, chatId);
 			return 0;
 		}
-	})
+	});
 }
 
 start();
