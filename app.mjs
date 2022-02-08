@@ -2,10 +2,11 @@ import security from './security.js';
 import { Telegraf } from 'telegraf';
 import stickers from './stickers.js';
 import fetch from 'node-fetch';
+import {Handbook} from "./classes/handbook.js";
 // import _ from 'lodash';
 const bot = new Telegraf(security.TELEGRAM_BOT_TOKEN);
 
-bot.telegram.setMyCommands([
+const botCommands = [
 	{command: '/start', description: 'Start a dialogue.'},
 	{command: '/help', description: 'Get some help of using.'},
 	{command: '/commands', description: 'See what are there the commands and how to use them.'},
@@ -14,7 +15,7 @@ bot.telegram.setMyCommands([
 	{command: '/joke', description: 'get random joke'},
 	{command: '/avatar', description: 'get your current avatar picture' },
 	{command: '/all_avatars', description: 'get all your avatar pictures' }
-]);
+]
 
 const usersBase = [];
 const chats = {};
@@ -134,6 +135,24 @@ const startGame = async (chatId, maxv) =>
 	}
 }
 
+const nep = new Handbook({
+	names: ['nep', 'нэп', 'неп'],
+	defaultMessage: 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".',
+	fullPath: [
+		'nep/targets.jpg',
+		'nep/events.jpg',
+		'nep/results.jpg'
+	],
+	branches: [
+		{text: 'Цель', callback_data: 'nep_targets'},
+		{text: 'Мероприятия', callback_data: 'nep_events'},
+		{text: 'Итоги', callback_data: 'nep_results'}
+
+	],
+	bot: bot,
+	chatId: ''
+});
+
 const start = () => {
 	bot.command('fact', async ctx => {
 		let fact = await getFact(1);
@@ -147,7 +166,9 @@ const start = () => {
 	{
 		const text = mes.message.text.toLowerCase();
 		const chatId = mes.chat.id;
-	
+
+		nep.chatId = chatId;
+
 		if (text === '/start') {
 			let from = mes.from;
 			let dublicate = false;
@@ -256,43 +277,31 @@ const start = () => {
 			text.includes('sup')
 		) {
 			return bot.telegram.sendMessage(chatId, 'Hey there!');
-		} else if(text === 'нэп' || text === 'nep') {
-			const nep_options = {
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{text: 'Цель', callback_data: 'nep_targets'},
-							{text: 'Мероприятия', callback_data: 'nep_events'},
-							{text: 'Итоги', callback_data: 'nep_results'}
-						]
-					]
-				}
-			};
-			return bot.telegram.sendMessage(chatId, 'Выберите раздел:', nep_options);
+		} else {
+			let resolve = nep.tg(text);
+			if(resolve)
+				return 1;
 		}
 		return bot.telegram.sendMessage(chatId, `Sorry, I do not understand you.`);
 	})
 	bot.on('callback_query', async msg => {
 		const data = await msg.callbackQuery.data;
 		const chatId = await msg.chat.id;
+
+		nep.chatId = chatId;
+
 		if (data === '/play_again') {
 			waiting_answer = 1;
 			return await bot.telegram.sendMessage(chatId, 'От нуля до скольки мне загадать число?');
-		} else if(data === 'nep_targets') {
-			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
-			return bot.telegram.sendPhoto(chatId, {source: './nep_img/targets/targets.jpg'});
-		} else if(data === 'nep_events') {
-			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
-			return bot.telegram.sendPhoto(chatId, {source: './nep_img/events/events.jpg'});
-		} else if(data === 'nep_results') {
-			bot.telegram.sendMessage(chatId, 'Новая экономическая политика – проводившаяся в период с 1921 по 1924 гг. в Советской России экономическая политика, пришедшая на смену политике "военного коммунизма".');
-			return bot.telegram.sendPhoto(chatId, {source: './nep_img/results/results.jpg'});
 		} else {
-			reactionsToAns(data, msg, chatId);
-			return 0;
+			nep.callback_query_hb(data);
 		}
+		reactionsToAns(data, msg, chatId);
+		return 0;
 	});
 }
+
+bot.telegram.setMyCommands(botCommands);
 
 start();
 
